@@ -14,7 +14,9 @@ import numpy as np
 from fmpy.util import plot_result
 import matplotlib.pyplot as plt
 import math
+import ctypes
 
+#%%
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #   ____             __ _
 #  / ___|___  _ __  / _(_) __ _ ___
@@ -23,12 +25,13 @@ import math
 #  \____\___/|_| |_|_| |_|\__, |___/
 #                         |___/
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#%%
+
 start_time = 0.0
 stop_time = 10.0
 step_size = 0.1
 show_plot = True
 
+#%%
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #  _                    _   _____ __  __ _   _
 # | |    ___   __ _  __| | |  ___|  \/  | | | |
@@ -37,7 +40,7 @@ show_plot = True
 # |_____\___/ \__,_|\__,_| |_|   |_|  |_|\___/
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#%%
+
 dirname = os.path.dirname(__file__)
 fmu_path = os.path.join(dirname, "fmu_model", "xy_model_om_dd.fmu")
 
@@ -51,6 +54,7 @@ fmu_model = xy_FMU_class(
     instance_name="xy_1"
 )
 
+#%%
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #  ____  _                 _       _   _
 # / ___|(_)_ __ ___  _   _| | __ _| |_(_) ___  _ __
@@ -59,7 +63,7 @@ fmu_model = xy_FMU_class(
 # |____/|_|_| |_| |_|\__,_|_|\__,_|\__|_|\___/|_| |_|
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#%%
+
 # result vector
 res = []
 # time vector
@@ -120,7 +124,14 @@ fmu_model.do_step(5.0, step_size)
 outputs = fmu_model.get_outputs()
 print("FMU outputs at t=5.0:", outputs)
 
+#%% extract the value of c_void_p from state[0] and cast to int
+print(int(state[0].value))
+# cast back to c_void_p
+print(ctypes.c_void_p(int(state[0].value)))
+
 #%% terminate the FMU
 fmu_model.terminate()
 
 print("ALL DONE!")
+
+
