@@ -149,7 +149,7 @@ class FMULayer(tf.keras.layers.Layer):
 
         # check if the backend is float64 (needed for FMU state pointer)
         if tf.keras.backend.floatx() != "float64":
-            raise ValueError("The FMU layer only supports float64")
+            raise ValueError("The FMU layer only supports float64") # FIXME: add support for float32
 
         self.units = 1
         self.cell = FMUCell(

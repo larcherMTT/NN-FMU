@@ -42,7 +42,7 @@ show_plot = True
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 dirname = os.path.dirname(__file__)
-fmu_path = os.path.join(dirname, "fmu_model", "xy_model_om_dd.fmu")
+fmu_path = os.path.join(dirname, "fmu_model", "xy_model_om_dd_par.fmu")
 
 # instantiate the class
 fmu_model = xy_FMU_class(
@@ -51,6 +51,7 @@ fmu_model = xy_FMU_class(
     start_values=[1.0,  # x
                   2.0], # y
     parameters=[2.0],  # k
+    learnable_parameters=[5.0],  # p
     instance_name="xy_1"
 )
 
@@ -87,14 +88,17 @@ for time in t_vect:
     # get the outputs
     outputs = fmu_model.get_outputs()
 
-    # get directional derivative
-    directional_derivative = fmu_model.get_directional_derivative()
+    # get directional derivative input/output
+    directional_derivative_io = fmu_model.get_directional_derivative()
+
+    # get directional derivative parameter
+    directional_derivative_p = fmu_model.get_directional_derivative_p()
 
     # gather FMU state
     state.append(fmu_model.get_FMU_state())
 
     # store the results
-    res.append((time, *inputs, *outputs, *directional_derivative))
+    res.append((time, *inputs, *outputs, *directional_derivative_io, *directional_derivative_p))
 
 # convert the results to a structured NumPy array
 res = np.array(
@@ -105,8 +109,10 @@ res = np.array(
             ("x", np.float64),
             ("y", np.float64),
             ("z", np.float64),
+            ("z_int_p", np.float64),
             ("dz_dx", np.float64),
             ("dz_dy", np.float64),
+            ("dz_int_p_dp", np.float64),
         ]
     ),
 )
