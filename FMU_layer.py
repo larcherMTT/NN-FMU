@@ -16,7 +16,7 @@ import tensorflow as tf
 import ctypes
 
 # custom libraries
-from xy_FMU import xy_FMU_class
+from FMU_wrap import *
 
 
 #  _____ __  __ _   _  ____     _ _
@@ -41,7 +41,7 @@ class FMUCell(tf.keras.layers.Layer):
         super(FMUCell, self).__init__(**kwargs)
 
         # instantiate the class
-        self.fmu_model = xy_FMU_class(
+        self.fmu_model = FMU2_model(
             fmu_path,
             start_time=start_time,
             start_values=start_values,

@@ -15,7 +15,7 @@ Brief guide to export FMUs and re-compile them. Re-compilation is necessary if t
 
 The integration of the FMUs in a NN framework requires the information of the <o>**partial derivatives**</o> of the outputs with respect to the inputs and learnable parameters. Learnable parameters must be defined as continuous variables into the FMU model, with a dummy equation such as:
 ```modelica
-Real a(start=0, fixed=true) "Learnable parameter";
+Real a(start=0, fixed=true, unit="1") "Learnable parameter";
 equation
 der(a) = 0;
 ```

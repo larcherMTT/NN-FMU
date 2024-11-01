@@ -2,11 +2,11 @@
 <fmiModelDescription
   fmiVersion="2.0"
   modelName="xy_model"
-  guid="{9362ae2c-45d4-4de2-a6af-f2826bd1f987}"
+  guid="{3e77e522-7777-44ac-a04a-c5ae01b322b8}"
   description=""
   version=""
   generationTool="OpenModelica Compiler OpenModelica v1.24.0 (64-bit)"
-  generationDateAndTime="2024-10-31T17:01:15Z"
+  generationDateAndTime="2024-11-01T19:44:37Z"
   variableNamingConvention="structured"
   numberOfEventIndicators="0">
   <CoSimulation
@@ -91,9 +91,6 @@
     </SourceFiles>
   </CoSimulation>
   <UnitDefinitions>
-    <Unit name="1">
-      <BaseUnit />
-    </Unit>
     <Unit name="m.s-1">
       <BaseUnit m="1" s="-1" />
     </Unit>
@@ -101,16 +98,6 @@
       <BaseUnit m="1" />
     </Unit>
   </UnitDefinitions>
-  <TypeDefinitions>
-    <SimpleType name="Modelica.Blocks.Types.Init">
-      <Enumeration>
-        <Item name="NoInit" value="1"/>
-        <Item name="SteadyState" value="2"/>
-        <Item name="InitialState" value="3"/>
-        <Item name="InitialOutput" value="4"/>
-      </Enumeration>
-    </SimpleType>
-  </TypeDefinitions>
   <LogCategories>
     <Category name="logEvents" />
     <Category name="logSingularLinearSystems" />
@@ -128,33 +115,31 @@
   <ModelVariables>
   <!-- Index of variable = "1" -->
   <ScalarVariable
-    name="custom_parameter1.p"
+    name="custom_integrator1.y"
     valueReference="0"
     initial="exact">
-    <Real start="1.0" unit="m"/>
+    <Real start="0.0"/>
   </ScalarVariable>
   <!-- Index of variable = "2" -->
   <ScalarVariable
-    name="integrator.y"
+    name="custom_parameter1.p"
     valueReference="1"
-    description="Connector of Real output signal"
-    >
-    <Real/>
+    initial="exact">
+    <Real start="1.0" unit="m"/>
   </ScalarVariable>
   <!-- Index of variable = "3" -->
   <ScalarVariable
-    name="der(custom_parameter1.p)"
+    name="der(custom_integrator1.y)"
     valueReference="2"
     >
-    <Real derivative="1" unit="m.s-1"/>
+    <Real derivative="1"/>
   </ScalarVariable>
   <!-- Index of variable = "4" -->
   <ScalarVariable
-    name="der(integrator.y)"
+    name="der(custom_parameter1.p)"
     valueReference="3"
-    description="der(Connector of Real output signal)"
     >
-    <Real derivative="2"/>
+    <Real derivative="2" unit="m.s-1"/>
   </ScalarVariable>
   <!-- Index of variable = "5" -->
   <ScalarVariable
@@ -181,7 +166,7 @@
   <!-- Index of variable = "8" -->
   <ScalarVariable
     name="product1.u2"
-    valueReference="12"
+    valueReference="11"
     description="Connector of Real input signal 2"
     >
     <Real/>
@@ -189,7 +174,7 @@
   <!-- Index of variable = "9" -->
   <ScalarVariable
     name="x"
-    valueReference="13"
+    valueReference="12"
     causality="input"
     >
     <Real start="0.0"/>
@@ -197,7 +182,7 @@
   <!-- Index of variable = "10" -->
   <ScalarVariable
     name="y"
-    valueReference="14"
+    valueReference="13"
     causality="input"
     >
     <Real start="0.0"/>
@@ -205,7 +190,7 @@
   <!-- Index of variable = "11" -->
   <ScalarVariable
     name="z"
-    valueReference="15"
+    valueReference="14"
     causality="output"
     >
     <Real/>
@@ -213,7 +198,7 @@
   <!-- Index of variable = "12" -->
   <ScalarVariable
     name="z_int"
-    valueReference="16"
+    valueReference="15"
     causality="output"
     >
     <Real/>
@@ -221,7 +206,7 @@
   <!-- Index of variable = "13" -->
   <ScalarVariable
     name="const.k"
-    valueReference="17"
+    valueReference="16"
     description="Constant output value"
     variability="fixed"
     causality="parameter"
@@ -231,7 +216,7 @@
   <!-- Index of variable = "14" -->
   <ScalarVariable
     name="const.y"
-    valueReference="18"
+    valueReference="17"
     description="Connector of Real output signal"
     variability="fixed"
     causality="calculatedParameter"
@@ -240,117 +225,66 @@
   </ScalarVariable>
   <!-- Index of variable = "15" -->
   <ScalarVariable
-    name="integrator.k"
-    valueReference="19"
-    description="Integrator gain"
-    variability="fixed"
-    causality="parameter"
-    >
-    <Real start="1.0" unit="1"/>
-  </ScalarVariable>
-  <!-- Index of variable = "16" -->
-  <ScalarVariable
-    name="integrator.y_start"
-    valueReference="20"
-    description="Initial or guess value of output (= state)"
-    variability="fixed"
-    causality="parameter"
-    >
-    <Real start="0.0"/>
-  </ScalarVariable>
-  <!-- Index of variable = "17" -->
-  <ScalarVariable
     name="product1.u1"
-    valueReference="21"
+    valueReference="18"
     description="Connector of Real input signal 1"
     variability="fixed"
     causality="calculatedParameter"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "16" -->
+  <ScalarVariable
+    name="custom_integrator1.u"
+    valueReference="14"
+    >
+    <Real/>
+  </ScalarVariable>
+  <!-- Index of variable = "17" -->
+  <ScalarVariable
+    name="custom_parameter1.u"
+    valueReference="0"
     >
     <Real/>
   </ScalarVariable>
   <!-- Index of variable = "18" -->
   <ScalarVariable
-    name="custom_parameter1.u"
-    valueReference="1"
+    name="custom_parameter1.y"
+    valueReference="15"
     >
     <Real/>
   </ScalarVariable>
   <!-- Index of variable = "19" -->
   <ScalarVariable
-    name="custom_parameter1.y"
-    valueReference="16"
+    name="product.u1"
+    valueReference="12"
+    description="Connector of Real input signal 1"
     >
     <Real/>
   </ScalarVariable>
   <!-- Index of variable = "20" -->
   <ScalarVariable
-    name="integrator.u"
-    valueReference="15"
-    description="Connector of Real input signal"
+    name="product.u2"
+    valueReference="13"
+    description="Connector of Real input signal 2"
     >
     <Real/>
   </ScalarVariable>
   <!-- Index of variable = "21" -->
   <ScalarVariable
-    name="product.u1"
-    valueReference="13"
-    description="Connector of Real input signal 1"
+    name="product.y"
+    valueReference="11"
+    description="Connector of Real output signal"
     >
     <Real/>
   </ScalarVariable>
   <!-- Index of variable = "22" -->
   <ScalarVariable
-    name="product.u2"
-    valueReference="14"
-    description="Connector of Real input signal 2"
-    >
-    <Real/>
-  </ScalarVariable>
-  <!-- Index of variable = "23" -->
-  <ScalarVariable
-    name="product.y"
-    valueReference="12"
-    description="Connector of Real output signal"
-    >
-    <Real/>
-  </ScalarVariable>
-  <!-- Index of variable = "24" -->
-  <ScalarVariable
     name="product1.y"
-    valueReference="15"
+    valueReference="14"
     description="Connector of Real output signal"
     >
     <Real/>
-  </ScalarVariable>
-  <!-- Index of variable = "25" -->
-  <ScalarVariable
-    name="integrator.initType"
-    valueReference="0"
-    description="Type of initialization (1: no init, 2: steady state, 3,4: initial output)"
-    variability="fixed"
-    causality="calculatedParameter"
-    >
-    <Enumeration declaredType="Modelica.Blocks.Types.Init"/>
-  </ScalarVariable>
-  <!-- Index of variable = "26" -->
-  <ScalarVariable
-    name="integrator.use_reset"
-    valueReference="1"
-    description="= true, if reset port enabled"
-    variability="fixed"
-    causality="calculatedParameter"
-    >
-    <Boolean/>
-  </ScalarVariable>
-  <!-- Index of variable = "27" -->
-  <ScalarVariable
-    name="integrator.use_set"
-    valueReference="2"
-    description="= true, if set port enabled and used as reinitialization value when reset"
-    variability="fixed"
-    causality="calculatedParameter"
-    >
-    <Boolean/>
   </ScalarVariable>
   </ModelVariables>
   <ModelStructure>
@@ -359,20 +293,16 @@
       <Unknown index="12" dependencies="1 2" dependenciesKind="dependent dependent" />
     </Outputs>
     <Derivatives>
-      <Unknown index="3" dependencies="" dependenciesKind="" />
-      <Unknown index="4" dependencies="9 10" dependenciesKind="dependent dependent" />
+      <Unknown index="3" dependencies="9 10" dependenciesKind="dependent dependent" />
+      <Unknown index="4" dependencies="" dependenciesKind="" />
     </Derivatives>
     <InitialUnknowns>
-      <Unknown index="2" dependencies="16" dependenciesKind="dependent" />
-      <Unknown index="3" dependencies="" dependenciesKind="" />
-      <Unknown index="4" dependencies="9 10 13 15" dependenciesKind="dependent dependent dependent dependent" />
+      <Unknown index="3" dependencies="9 10 13" dependenciesKind="dependent dependent dependent" />
+      <Unknown index="4" dependencies="" dependenciesKind="" />
       <Unknown index="11" dependencies="9 10 13" dependenciesKind="dependent dependent dependent" />
-      <Unknown index="12" dependencies="1 16" dependenciesKind="dependent dependent" />
+      <Unknown index="12" dependencies="1 2" dependenciesKind="dependent dependent" />
       <Unknown index="14" dependencies="13" dependenciesKind="dependent" />
-      <Unknown index="17" dependencies="13" dependenciesKind="dependent" />
-      <Unknown index="25" dependencies="" dependenciesKind="" />
-      <Unknown index="26" dependencies="" dependenciesKind="" />
-      <Unknown index="27" dependencies="" dependenciesKind="" />
+      <Unknown index="15" dependencies="13" dependenciesKind="dependent" />
     </InitialUnknowns>
   </ModelStructure>
 </fmiModelDescription>
