@@ -30,12 +30,13 @@ class FMUCell(tf.keras.layers.Layer):
 
     def __init__(
         self,
-        fmu_path,
-        start_time,
-        start_values,
-        parameters,
-        step_size,
-        do_step_in_gradient=False,
+        fmu_path: str = None,
+        start_time: float = 0.0,
+        start_values: dict = None,
+        parameters: dict = None,
+        learnable_parameters: list | set = None,
+        step_size: float = 0.1,
+        do_step_in_gradient: bool = False,
         **kwargs
     ):
         super(FMUCell, self).__init__(**kwargs)
@@ -46,14 +47,14 @@ class FMUCell(tf.keras.layers.Layer):
             start_time=start_time,
             start_values=start_values,
             parameters=parameters,
+            learnable_parameters=learnable_parameters,
             instance_name=self.name,
         )
 
         self.do_step_in_gradient = do_step_in_gradient
         self.start_time = start_time
-        self.time = start_time
         self.dt = step_size
-        self.state_size = 1 # state: pointer value to the FMU state
+        self.state_size = 2 # state: [pointer value to the FMU state, FMU time]
         self.output_size = len(self.fmu_model.get_outputs())
 
     def build(self, input_shape):
@@ -64,7 +65,7 @@ class FMUCell(tf.keras.layers.Layer):
         output = self.fmu_op(input_tensor, state)
         fmu_state = tf.py_function(
             func=lambda: tf.constant(
-                self.fmu_model.get_FMU_state().value,
+                self.fmu_model.get_FMU_state_value(),
                 dtype=tf.keras.backend.floatx(),
             ),
             inp=[],
@@ -76,9 +77,8 @@ class FMUCell(tf.keras.layers.Layer):
     def fmu_op(self, inputs, state):
 
         def fmu_step(inputs):
-            self.fmu_model.set_inputs(*tf.unstack(tf.reshape(inputs, [-1])))
-            self.fmu_model.do_step(self.time, self.dt)
-            self.time += self.dt
+            self.fmu_model.set_inputs(tf.unstack(tf.reshape(inputs, [-1])))
+            self.fmu_model.do_step(self.dt)
             return tf.convert_to_tensor(
                 self.fmu_model.get_outputs(), dtype=tf.keras.backend.floatx()
             )
@@ -89,20 +89,26 @@ class FMUCell(tf.keras.layers.Layer):
 
             def grad_step(upstream, state, inputs):
                 # set the FMU state
-                self.fmu_model.set_FMU_state(ctypes.c_void_p(int(state[0])))
+                self.fmu_model.set_FMU_state_value(state[0,0], set_time=False)
                 if self.do_step_in_gradient:
                     # do step to compute the directional derivative at the effective current state
-                    self.fmu_model.set_inputs(*tf.unstack(tf.reshape(inputs, [-1])))
-                    self.fmu_model.do_step(self.time, self.dt)
-                return upstream * tf.convert_to_tensor(
-                    self.fmu_model.get_directional_derivative(),
+                    self.fmu_model.set_inputs(tf.unstack(tf.reshape(inputs, [-1])))
+                    self.fmu_model.do_step(self.dt)
+
+                # Compute the Jacobian with directional derivative
+                jacobian = tf.convert_to_tensor(
+                    self.fmu_model.get_directional_derivative_io(),
                     dtype=tf.keras.backend.floatx(),
                 )
+
+                # Sum over the rows of the Jacobian matrix to get the gradient w.r.t. each input
+                grad = tf.reduce_sum(tf.transpose(upstream) * jacobian, axis=0)
+                return grad
 
             grad = tf.py_function(
                 grad_step, inp=[upstream, state, inputs], Tout=tf.keras.backend.floatx()
             )
-            return tf.reshape(grad, [1, self.input_size]), None
+            return tf.reshape(grad, [1, self.input_size]), None # TODO: add learnable parameters
 
         return (
             tf.reshape(outputs, [1, self.output_size]),
@@ -110,8 +116,6 @@ class FMUCell(tf.keras.layers.Layer):
         )
 
     def reset_states(self):
-        # reset time
-        self.time = self.start_time
         # reset FMU states
         self.fmu_model.reset_FMU()
 
@@ -137,12 +141,13 @@ class FMULayer(tf.keras.layers.Layer):
 
     def __init__(
         self,
-        fmu_path,
-        start_time,
-        start_values,
-        parameters,
-        step_size,
-        do_step_in_gradient=False,
+        fmu_path: str = None,
+        start_time: float = 0.0,
+        start_values: dict = None,
+        parameters: dict = None,
+        learnable_parameters: list | set = None,
+        step_size: float = 0.1,
+        do_step_in_gradient: bool = False,
         **kwargs
     ):
         super(FMULayer, self).__init__()
@@ -157,13 +162,14 @@ class FMULayer(tf.keras.layers.Layer):
             start_time,
             start_values,
             parameters,
+            learnable_parameters,
             step_size,
             do_step_in_gradient=do_step_in_gradient,
         )
 
         # set initial states
         self.initial_state = tf.constant(
-            [[self.cell.fmu_model.get_FMU_state().value]],
+            [self.cell.fmu_model.get_FMU_state_value()],
             dtype=tf.keras.backend.floatx(),
         )
 

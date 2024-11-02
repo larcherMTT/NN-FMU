@@ -11,6 +11,7 @@
 from fmpy import read_model_description, extract
 from fmpy.fmi2 import FMU2Slave
 import shutil
+import ctypes
 
 
 class FMU2_model(object):
@@ -110,10 +111,13 @@ class FMU2_model(object):
         shutil.rmtree(unzipdir, ignore_errors=True)
 
     #
-    def set_inputs(self, inputs: dict = None):
+    def set_inputs(self, inputs: dict | list = None):
         """set the inputs"""
 
-        self.fmu.setReal([self.inp[key] for key in inputs.keys()], list(inputs.values()))
+        if isinstance(inputs, list):
+            self.fmu.setReal(list(self.inp.values()), inputs)
+        else:
+            self.fmu.setReal([self.inp[key] for key in inputs.keys()], list(inputs.values()))
 
         #
     def set_known(self, knw: dict = None):
@@ -168,6 +172,28 @@ class FMU2_model(object):
         return [self.fmu.getFMUstate(), self.time]
 
     #
+    def get_FMU_state_value(self):
+        """get the FMU state"""
+
+        return [self.fmu.getFMUstate().value, self.time]
+
+    #
+    def set_FMU_state(self, state, set_time=True):
+        """set the FMU state"""
+
+        self.fmu.setFMUstate(state[0])
+        if set_time:
+            self.time = state[1]
+
+    #
+    def set_FMU_state_value(self, state, set_time=True):
+        """set the FMU state"""
+
+        self.fmu.setFMUstate(ctypes.c_void_p(int(state[0])))
+        if set_time:
+            self.time = state[1]
+
+    #
     def get_model_description(self):
         """get the model description"""
 
@@ -178,13 +204,6 @@ class FMU2_model(object):
         """get the FMU time"""
 
         return self.time
-
-    #
-    def set_FMU_state(self, state):
-        """set the FMU state"""
-
-        self.fmu.setFMUstate(state[0])
-        self.time = state[1]
 
     #
     def free_FMU_state(self, state):
