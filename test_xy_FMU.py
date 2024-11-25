@@ -132,6 +132,10 @@ fmu_model.do_step(step_size)
 outputs = fmu_model.get_outputs()
 print(f"FMU outputs at t={fmu_model.time:.3f}: {outputs}")
 
+#%% FMU gradients
+fmu_model.print_jacobian_io()
+fmu_model.print_jacobian_lp()
+
 #%% extract the value of c_void_p from state[0] and cast to int
 print(int(state[0][0].value))
 # cast back to c_void_p

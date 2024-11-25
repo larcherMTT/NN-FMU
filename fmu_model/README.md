@@ -36,7 +36,7 @@ Follow the instructions in the file [Re-Compile_Simulink.md](./Re-Compile_Simuli
 ## OpenModelica
 To generate the directional derivatives set the following flags in the `Simulation Setup - Translation flags`:
 ```
--d=-DirectionalDerivatives=true
+-d=-disableDirectionalDerivatives
 ```
 
 to include the Modelica runtime dependencies in the FMU, add the following flag to the `Simulation Setup - Translation flags`

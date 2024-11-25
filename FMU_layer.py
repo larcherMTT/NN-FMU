@@ -108,7 +108,7 @@ class FMUCell(tf.keras.layers.Layer):
             grad = tf.py_function(
                 grad_step, inp=[upstream, state, inputs], Tout=tf.keras.backend.floatx()
             )
-            return tf.reshape(grad, [1, self.input_size]), None # TODO: add learnable parameters
+            return tf.reshape(grad, inputs.shape), None # TODO: add learnable parameters
 
         return (
             tf.reshape(outputs, [1, self.output_size]),

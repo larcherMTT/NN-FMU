@@ -44,15 +44,15 @@ class FMU2_model(object):
             self.vrs[variable.name] = variable.valueReference
 
         # check if the inputs dicts comply with the FMU variables
-        if start_values is not None:
+        if start_values is not None and start_values != {}:
             for key in start_values.keys():
                 if key not in self.vrs.keys():
                     raise ValueError(f"Variable {key} not found in the FMU")
-        if parameters is not None:
+        if parameters is not None and parameters != {}:
             for key in parameters.keys():
                 if key not in self.vrs.keys():
                     raise ValueError(f"Variable {key} not found in the FMU")
-        if learnable_parameters is not None:
+        if learnable_parameters is not None and learnable_parameters != {}:
             for key in learnable_parameters:
                 if key not in self.vrs.keys():
                     raise ValueError(f"Variable {key} not found in the FMU")
@@ -83,8 +83,9 @@ class FMU2_model(object):
 
         # FMU learnable parameters
         self.learnable_parameters = {}
-        for p in learnable_parameters:
-            self.learnable_parameters[p] = self.vrs[p]
+        if learnable_parameters is not None and learnable_parameters != {}:
+            for p in learnable_parameters:
+                self.learnable_parameters[p] = self.vrs[p]
 
         # initialize the FMU
         self.fmu.instantiate()
@@ -93,13 +94,15 @@ class FMU2_model(object):
         self.fmu.setupExperiment(startTime=start_time)
 
         # set the parameters and learnable parameters
-        self.fmu.setReal([self.vrs[key] for key in parameters.keys()], list(parameters.values()))
+        if parameters is not None and parameters != {}:
+            self.fmu.setReal([self.vrs[key] for key in parameters.keys()], list(parameters.values()))
 
         # enter initialization mode
         self.fmu.enterInitializationMode()
 
         # set the start values
-        self.fmu.setReal([self.vrs[key] for key in start_values.keys()], list(start_values.values()))
+        if start_values is not None and start_values != {}:
+            self.fmu.setReal([self.vrs[key] for key in start_values.keys()], list(start_values.values()))
 
         # exit initialization mode
         self.fmu.exitInitializationMode()
@@ -118,6 +121,15 @@ class FMU2_model(object):
             self.fmu.setReal(list(self.inp.values()), inputs)
         else:
             self.fmu.setReal([self.inp[key] for key in inputs.keys()], list(inputs.values()))
+
+    #
+    def set_learnable_parameters(self, lp: dict | list = None):
+        """set the learnable parameters"""
+
+        if isinstance(lp, list):
+            self.fmu.setReal(list(self.learnable_parameters.values()), lp)
+        else:
+            self.fmu.setReal([self.learnable_parameters[key] for key in lp.keys()], list(lp.values()))
 
         #
     def set_known(self, knw: dict = None):
@@ -141,13 +153,20 @@ class FMU2_model(object):
     def get_outputs_names(self):
         """get the outputs names"""
 
-        return self.out.keys()
+        return list(self.out.keys())
+
+    #
+    def get_inputs_names(self):
+        """get the inputs names"""
+
+        return list(self.inp.keys())
 
     #
     def get_directional_derivative_io(self):
         """get the directional derivative of outputs w.r.t. inputs"""
 
         der = [] # FIXME: consider preallocating the list for performance
+        if self.inp == {}: return der # early return if no inputs
         # construct the jacobian matrix (column-wise)
         for inp in self.inp.keys():
             der.append(self.fmu.getDirectionalDerivative(list(self.out.values()), [self.inp[inp]], [1.0]))
@@ -159,11 +178,42 @@ class FMU2_model(object):
         """get the directional derivative of outputs w.r.t. learnable parameters"""
 
         der = [] # FIXME: consider preallocating the list for performance
+        if self.learnable_parameters == {}: return der # early return if no learnable parameters
         # construct the jacobian matrix (column-wise)
         for p in self.learnable_parameters.keys():
             der.append(self.fmu.getDirectionalDerivative(list(self.out.values()), [self.learnable_parameters[p]], [1.0]))
 
         return list(map(list, zip(*der))) # FIXME: transpose the matrix during the construction (see getAdjointDerivative fmi3)
+
+    #
+    def print_jacobian_io(self):
+        """print the jacobian matrix of outputs w.r.t. inputs"""
+
+        der = self.get_directional_derivative_io()
+        i_names = self.get_inputs_names()
+        o_names = self.get_outputs_names()
+
+        print("Jacobian matrix of outputs w.r.t. inputs:")
+        # print the jacobian matrix with the first column being the output names and the first row being the input names
+        print("".join(["{:>15}".format(name) for name in [""] + i_names]))
+        for i, row in enumerate(der):
+            formatted_row = ["{:>20}".format(o_names[i])] + ["{:>15.3e}".format(val) for val in row]
+            print("".join(formatted_row))
+
+    #
+    def print_jacobian_lp(self):
+        """print the jacobian matrix of outputs w.r.t. learnable parameters"""
+
+        der = self.get_directional_derivative_lp()
+        p_names = list(self.learnable_parameters.keys())
+        o_names = self.get_outputs_names()
+
+        print("Jacobian matrix of outputs w.r.t. learnable parameters:")
+        # print the jacobian matrix with the first column being the output names and the first row being the learnable parameter names
+        print("".join(["{:>15}".format(name) for name in [""] + p_names]))
+        for i, row in enumerate(der):
+            formatted_row = ["{:>20}".format(o_names[i])] + ["{:>15.3e}".format(val) for val in row]
+            print("".join(formatted_row))
 
     #
     def get_FMU_state(self):
