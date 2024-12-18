@@ -26,6 +26,7 @@ class FMU2_model(object):
         parameters: dict = None,
         learnable_parameters: list | set = None,
         instance_name: str = "instance1",
+        enable_substeps: bool = False,
     ):
         """class constructor
         fmu_path: path to the FMU file
@@ -33,6 +34,8 @@ class FMU2_model(object):
         start_values: dictionary with the start values
         parameters: dictionary with the parameters values
         learnable_parameters: list of learnable parameters
+        instance_name: instance name
+        enable_substeps: enable substeps
         """
 
         # load the FMU
@@ -112,6 +115,13 @@ class FMU2_model(object):
 
         # clean up
         shutil.rmtree(unzipdir, ignore_errors=True)
+
+        # enable substeps
+        self.enable_substeps = enable_substeps
+        if enable_substeps:
+            print(f"Substeps are enabled for instance '{instance_name}'. Remember that some FMUs may come with built-in substepping mechanisms that may interfere with the substepping mechanism of this class.")
+        # get the fmu step size
+        self.fmu_step_size =  self.model_description.defaultExperiment.stepSize
 
     #
     def set_inputs(self, inputs: dict | list = None):
@@ -283,10 +293,19 @@ class FMU2_model(object):
     def do_step(self, step_size):
         """do a step"""
 
-        self.time += step_size
+        # check if step_size is a multiple of the FMU step size
+        # if self.enable_substeps and (int(step_size/self.fmu_step_size) - step_size/self.fmu_step_size) != 0:
+        #     raise ValueError("Step size must be a multiple of the FMU step size. Got step size: {} and FMU step size: {}".format(step_size, self.fmu_step_size))
 
-        self.fmu.doStep(currentCommunicationPoint=self.time,
-                        communicationStepSize=step_size)
+        if self.enable_substeps:
+            for _ in range(int(step_size / self.fmu_step_size)):
+                self.fmu.doStep(currentCommunicationPoint=self.time,
+                                communicationStepSize=self.fmu_step_size)
+                self.time += self.fmu_step_size
+        else:
+            self.fmu.doStep(currentCommunicationPoint=self.time,
+                            communicationStepSize=step_size)
+            self.time += step_size
 
     #
     def terminate(self):

@@ -7,7 +7,12 @@
 - [ ] Add example with modelica code generation from Maple or sympy
 - [ ] Introduce and test feedback loops (see https://github.com/csirmaz/superloop)
 - [ ] Get layer definition from DT (with learnable parameters)
-- [ ] Check if learnable parameters can be treated as (causality = "parameter" and variability = "tunable") and chek if the directional derivatives are computed correctly
+- [ ] Check if learnable parameters can be treated as (causality = "parameter" and variability = "tunable") and chek if the directional derivatives are computed correctly -> causality seems to not be supported by omc
+- [ ] Create maple toolbox for modelica code generation
+  - [ ] add handling of learnable parameters
+  - [ ] add `reinit` functionality for states
+- [ ] update readme with exportation with cvode integrator and with make install command (probably also .fmu exportation, see cmakelists.txt)
+
 
 
 # FIXES

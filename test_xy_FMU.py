@@ -124,6 +124,7 @@ if show_plot:
     plot_result(res)
     plt.show()
 
+
 #%% restore te FMU state at t=5.0 and perform a step
 fmu_model.set_FMU_state(state[49])
 fmu_model.do_step(step_size)
@@ -131,6 +132,7 @@ fmu_model.do_step(step_size)
 #%% get the FMU outputs
 outputs = fmu_model.get_outputs()
 print(f"FMU outputs at t={fmu_model.time:.3f}: {outputs}")
+
 
 #%% FMU gradients
 fmu_model.print_jacobian_io()
